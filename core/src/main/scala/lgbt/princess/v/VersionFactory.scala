@@ -4,7 +4,6 @@ import scala.collection.immutable.ArraySeq
 
 /** A factory for creating versions of a particular type. */
 trait VersionFactory[+V <: Version] {
-  import VersionFactory._
 
   // TODO: improve how this is managed, particularly for constrained versions
   /** The name of the type of version produced by this factory. */
@@ -138,6 +137,11 @@ trait VersionFactory[+V <: Version] {
     } else None
   }
 
+  @inline private[this] def splitOnDots(version: String): Array[String] = {
+    val max = maxArity + 1
+    version.split("""\.""", if (max <= 0) -1 else max)
+  }
+
   /**
    * Creates this factory's type of version from a string representation of a
    * version.
@@ -147,15 +151,10 @@ trait VersionFactory[+V <: Version] {
    *         type equivalent to the string representation of a version, if the
    *         string is compatible with this factory's type
    */
-  final def parse(version: String): Option[V] =
-    if (version.endsWith(".")) None
-    else {
-      val max = maxArity
-      val strings =
-        if (max <= 0) dotRegex.split(version)
-        else dotRegex.pattern.split(version, max + 1)
-      if (isValidArity(strings.length)) parseInts(strings) else None
-    }
+  final def parse(version: String): Option[V] = {
+    val strings = splitOnDots(version)
+    if (isValidArity(strings.length)) parseInts(strings) else None
+  }
 
   /**
    * Creates this factory's type of version from a string representation of a
@@ -171,14 +170,11 @@ trait VersionFactory[+V <: Version] {
   final def unsafeParse(version: String): V = {
     @inline def fail(): Nothing =
       throw new VersionFormatException(badVersion = version, targetTypeDescription = versionTypeDescription)
-    if (version.endsWith(".")) fail()
-    val max = this.maxArity
-    val strings =
-      if (max <= 0) dotRegex.split(version)
-      else dotRegex.pattern.split(version, max + 1)
+    val strings = splitOnDots(version)
     if (isValidArity(strings.length)) {
       val ints =
-        try strings map { _.toInt } catch {
+        try strings.map(_.toInt)
+        catch {
           case e: NumberFormatException =>
             throw new VersionFormatException(
               badVersion = version,
@@ -202,7 +198,6 @@ trait VersionFactory[+V <: Version] {
 }
 
 object VersionFactory {
-  private val dotRegex = """\.""".r
 
   /**
    * A mixin for [[VersionFactory]]s of versions with fixed sizes
