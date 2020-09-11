@@ -3,13 +3,41 @@ package lgbt.princess.v
 import scala.collection.immutable.ArraySeq
 
 class V2Test extends BaseSpec {
-  nameOf[V2] should "allow negative values" in {
+  behavior of nameOf[V2]
+
+  it should "allow negative values" in {
     noException should be thrownBy V2(-1, -2)
+  }
+
+  it should "have product-/tuple-like accessors" in {
+    val v = V2(1, 2)
+    v._1 shouldBe 1
+    v._2 shouldBe 2
+  }
+
+  it should "compare equality correctly" in {
+    V2(1, 2) shouldEqual V2(1, 2)
+    V2(1, 2) shouldEqual Variable(1, 2)
+
+    V2(1, 2) should not equal V2(1, 3)
+    V2(1, 2) should not equal V2(2, 2)
+    V2(1, 2) should not equal Variable(1, 3)
+    V2(1, 2) should not equal Variable(2, 2)
+    V2(1, 2) should not equal Variable(1, 2, 3)
+    V2(1, 2) should not equal new AnyRef
+  }
+
+  it should "have a consistent hash code" in {
+    V2(1, 2).hashCode shouldEqual V2(1, 2).hashCode
+    V2(1, 2).hashCode shouldEqual Variable(1, 2).hashCode
   }
 
   it should "be ordered correctly" in {
     V2(1, 2) should be < V2(1, 3)
     V2(1, 2) should be < V2(2, 0)
+
+    V2(1, 2) < V2(1, 3) shouldBe true
+    V2(1, 2) < V2(2, 0) shouldBe true
   }
 
   it should "convert from other versions safely (as `Option`s)" in {
@@ -93,10 +121,18 @@ class V2Test extends BaseSpec {
     V2 unsafeParse "-1.-2" shouldBe V2(-1, -2)
 
     a[VersionFormatException] should be thrownBy { V2 unsafeParse "" }
+    a[VersionFormatException] should be thrownBy { V2 unsafeParse " " }
     a[VersionFormatException] should be thrownBy { V2 unsafeParse "1" }
     a[VersionFormatException] should be thrownBy { V2 unsafeParse "1.2." }
     a[VersionFormatException] should be thrownBy { V2 unsafeParse ".1.2" }
     a[VersionFormatException] should be thrownBy { V2 unsafeParse "1.2.3" }
     a[VersionFormatException] should be thrownBy { V2 unsafeParse "not a version" }
+  }
+
+  it should "extract from strings" in {
+    "1.2" shouldMatch { case V2(1, 2) => }
+
+    "1" shouldNotMatch { case V2(_, _) => }
+    "1.2.3" shouldNotMatch { case V2(_, _) => }
   }
 }

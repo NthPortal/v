@@ -6,6 +6,7 @@ final class Variable private (val seq: IndexedSeq[Int]) extends Version with Ord
 
   override def factory: VersionFactory[Variable] = Variable
 
+  override def productPrefix: String = "Variable"
   override def productArity: Int              = seq.length
   override def productElement(n: Int): Any    = seq(n)
   override def productIterator: Iterator[Any] = seq.iterator

@@ -3,8 +3,39 @@ package lgbt.princess.v
 import scala.collection.immutable.ArraySeq
 
 class V4Test extends BaseSpec {
-  nameOf[V4] should "allow negative values" in {
+  behavior of nameOf[V4]
+
+  it should "allow negative values" in {
     noException should be thrownBy V4(-1, -2, -3, -4)
+  }
+
+  it should "have product-/tuple-like accessors" in {
+    val v = V4(1, 2, 3, 4)
+    v._1 shouldBe 1
+    v._2 shouldBe 2
+    v._3 shouldBe 3
+    v._4 shouldBe 4
+  }
+
+  it should "compare equality correctly" in {
+    V4(1, 2, 3, 4) shouldEqual V4(1, 2, 3, 4)
+    V4(1, 2, 3, 4) shouldEqual Variable(1, 2, 3, 4)
+
+    V4(1, 2, 3, 4) should not equal V4(1, 2, 3, 5)
+    V4(1, 2, 3, 4) should not equal V4(1, 2, 4, 4)
+    V4(1, 2, 3, 4) should not equal V4(1, 3, 3, 4)
+    V4(1, 2, 3, 4) should not equal V4(2, 2, 3, 4)
+    V4(1, 2, 3, 4) should not equal Variable(1, 2, 3, 5)
+    V4(1, 2, 3, 4) should not equal Variable(1, 2, 4, 4)
+    V4(1, 2, 3, 4) should not equal Variable(1, 3, 3, 4)
+    V4(1, 2, 3, 4) should not equal Variable(2, 2, 3, 4)
+    V4(1, 2, 3, 4) should not equal Variable(1, 2, 3, 4, 5)
+    V4(1, 2, 3, 4) should not equal new AnyRef
+  }
+
+  it should "have a consistent hash code" in {
+    V4(1, 2, 3, 4).hashCode shouldEqual V4(1, 2, 3, 4).hashCode
+    V4(1, 2, 3, 4).hashCode shouldEqual Variable(1, 2, 3, 4).hashCode
   }
 
   it should "be ordered correctly" in {
@@ -12,6 +43,11 @@ class V4Test extends BaseSpec {
     V4(1, 2, 3, 4) should be < V4(1, 2, 4, 0)
     V4(1, 2, 3, 4) should be < V4(1, 3, 0, 0)
     V4(1, 2, 3, 4) should be < V4(2, 0, 0, 0)
+
+    V4(1, 2, 3, 4) < V4(1, 2, 3, 5) shouldBe true
+    V4(1, 2, 3, 4) < V4(1, 2, 4, 0) shouldBe true
+    V4(1, 2, 3, 4) < V4(1, 3, 0, 0) shouldBe true
+    V4(1, 2, 3, 4) < V4(2, 0, 0, 0) shouldBe true
   }
 
   it should "convert from other versions safely (as `Option`s)" in {
@@ -97,10 +133,18 @@ class V4Test extends BaseSpec {
     V4 unsafeParse "-1.-2.-3.-4" shouldBe V4(-1, -2, -3, -4)
 
     a[VersionFormatException] should be thrownBy { V4 unsafeParse "" }
+    a[VersionFormatException] should be thrownBy { V4 unsafeParse " " }
     a[VersionFormatException] should be thrownBy { V4 unsafeParse "1.2.3" }
     a[VersionFormatException] should be thrownBy { V4 unsafeParse "1.2.3.4." }
     a[VersionFormatException] should be thrownBy { V4 unsafeParse ".1.2.3.4" }
     a[VersionFormatException] should be thrownBy { V4 unsafeParse "1.2.3.4.5" }
     a[VersionFormatException] should be thrownBy { V4 unsafeParse "not a version" }
+  }
+
+  it should "extract from strings" in {
+    "1.2.3.4" shouldMatch { case V4(1, 2, 3, 4) => }
+
+    "1.2.3" shouldNotMatch { case V4(_, _, _, _) => }
+    "1.2.3.4.5" shouldNotMatch { case V4(_, _, _, _) => }
   }
 }

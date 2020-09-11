@@ -3,14 +3,46 @@ package lgbt.princess.v
 import scala.collection.immutable.ArraySeq
 
 class V3Test extends BaseSpec {
-  nameOf[V3] should "allow negative values" in {
+  behavior of nameOf[V3]
+
+  it should "allow negative values" in {
     noException should be thrownBy V3(-1, -2, -3)
+  }
+
+  it should "have product-/tuple-like accessors" in {
+    val v = V3(1, 2, 3)
+    v._1 shouldBe 1
+    v._2 shouldBe 2
+    v._3 shouldBe 3
+  }
+
+  it should "compare equality correctly" in {
+    V3(1, 2, 3) shouldEqual V3(1, 2, 3)
+    V3(1, 2, 3) shouldEqual Variable(1, 2, 3)
+
+    V3(1, 2, 3) should not equal V3(1, 2, 4)
+    V3(1, 2, 3) should not equal V3(1, 3, 3)
+    V3(1, 2, 3) should not equal V3(2, 2, 3)
+    V3(1, 2, 3) should not equal Variable(1, 2, 4)
+    V3(1, 2, 3) should not equal Variable(1, 3, 3)
+    V3(1, 2, 3) should not equal Variable(2, 2, 3)
+    V3(1, 2, 3) should not equal Variable(1, 2, 3, 4)
+    V3(1, 2, 3) should not equal new AnyRef
+  }
+
+  it should "have a consistent hash code" in {
+    V3(1, 2, 3).hashCode shouldEqual V3(1, 2, 3).hashCode
+    V3(1, 2, 3).hashCode shouldEqual Variable(1, 2, 3).hashCode
   }
 
   it should "be ordered correctly" in {
     V3(1, 2, 3) should be < V3(1, 2, 4)
     V3(1, 2, 3) should be < V3(1, 3, 0)
     V3(1, 2, 3) should be < V3(2, 0, 0)
+
+    V3(1, 2, 3) < V3(1, 2, 4) shouldBe true
+    V3(1, 2, 3) < V3(1, 3, 0) shouldBe true
+    V3(1, 2, 3) < V3(2, 0, 0) shouldBe true
   }
 
   it should "convert from other versions safely (as `Option`s)" in {
@@ -94,10 +126,18 @@ class V3Test extends BaseSpec {
     V3 unsafeParse "-1.-2.-3" shouldBe V3(-1, -2, -3)
 
     a[VersionFormatException] should be thrownBy { V3 unsafeParse "" }
+    a[VersionFormatException] should be thrownBy { V3 unsafeParse " " }
     a[VersionFormatException] should be thrownBy { V3 unsafeParse "1.2" }
     a[VersionFormatException] should be thrownBy { V3 unsafeParse "1.2.3." }
     a[VersionFormatException] should be thrownBy { V3 unsafeParse ".1.2.3" }
     a[VersionFormatException] should be thrownBy { V3 unsafeParse "1.2.3.4" }
     a[VersionFormatException] should be thrownBy { V3 unsafeParse "not a version" }
+  }
+
+  it should "extract from strings" in {
+    "1.2.3" shouldMatch { case V3(1, 2, 3) => }
+
+    "1.2" shouldNotMatch { case V3(_, _, _) => }
+    "1.2.3.4" shouldNotMatch { case V3(_, _, _) => }
   }
 }

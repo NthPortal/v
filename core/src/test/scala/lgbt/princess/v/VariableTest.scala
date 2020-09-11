@@ -26,10 +26,57 @@ class VariableTest extends BaseSpec {
     Variable(values).seq should be theSameInstanceAs values
   }
 
+  it should "have the correct productPrefix" in {
+    Variable(1, 2, 3).productPrefix shouldBe "Variable"
+  }
+
+  it should "have the correct productArity" in {
+    Variable(1, 2).productArity shouldBe 2
+    Variable(1, 2, 3).productArity shouldBe 3
+    Variable(1, 2, 3, 4).productArity shouldBe 4
+  }
+
+  it should "have the correct productElement" in {
+    val v = Variable(1, 2, 3)
+    (0 until v.productArity).map(v.productElement).toList shouldEqual v.seq
+  }
+
+  it should "have the correct productIterator" in {
+    val v = Variable(1, 2, 3)
+    v.productIterator.toList shouldEqual v.seq
+  }
+
+  it should "compare equality correctly" in {
+    Variable(1, 2, 3) shouldEqual Variable(1, 2, 3)
+    Variable(1, 2) shouldEqual V2(1, 2)
+    Variable(1, 2, 3) shouldEqual V3(1, 2, 3)
+    Variable(1, 2, 3, 4) shouldEqual V4(1, 2, 3, 4)
+
+    Variable(1, 2, 3) should not equal Variable(1, 2, 4)
+    Variable(1, 2, 3) should not equal Variable(1, 3, 3)
+    Variable(1, 2, 3) should not equal Variable(2, 2, 3)
+    Variable(1, 2, 3) should not equal Variable(1, 2)
+    Variable(1, 2, 3) should not equal Variable(1, 2, 3, 4)
+    Variable(1, 2, 3) should not equal V3(1, 2, 4)
+    Variable(1, 2, 3) should not equal V3(1, 3, 3)
+    Variable(1, 2, 3) should not equal V3(2, 2, 3)
+    Variable(1, 2, 3, 4) should not equal V3(1, 2, 3)
+    Variable(1, 2, 3) should not equal new AnyRef
+  }
+
+  it should "have a consistent hash code" in {
+    Variable(1, 2, 3).hashCode shouldEqual Variable(1, 2, 3).hashCode
+    Variable(1, 2, 3).hashCode shouldEqual V3(1, 2, 3).hashCode
+  }
+
   it should "be ordered correctly" in {
     Variable(1, 2) should be < Variable(1, 2, 0)
     Variable(1, 2) should be < Variable(1, 3)
     Variable(1, 2) should be < Variable(2, 0)
+
+    Variable(1, 2) < Variable(1, 2, 0) shouldBe true
+    Variable(1, 2) < Variable(1, 3) shouldBe true
+    Variable(1, 2) < Variable(2, 0) shouldBe true
   }
 
   it should "convert from other versions safely (as `Option`s)" in {
@@ -101,6 +148,7 @@ class VariableTest extends BaseSpec {
     Variable unsafeParse "-3.2.-4" shouldBe Variable(-3, 2, -4)
 
     a[VersionFormatException] should be thrownBy { Variable unsafeParse "" }
+    a[VersionFormatException] should be thrownBy { Variable unsafeParse " " }
     a[VersionFormatException] should be thrownBy { Variable unsafeParse "1.2." }
     a[VersionFormatException] should be thrownBy { Variable unsafeParse ".1.2" }
     a[VersionFormatException] should be thrownBy { Variable unsafeParse "not a version" }

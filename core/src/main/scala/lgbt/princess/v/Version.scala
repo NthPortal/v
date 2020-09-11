@@ -50,7 +50,7 @@ trait Version extends Product {
 }
 
 private object Version {
-  private final val hashSeed = 31
+  private final val hashSeed = "Version".hashCode
 
   type Aux[V] = Version { type Self = V }
 }
