@@ -22,6 +22,16 @@ class IdentifierTypeTest extends BaseSpec {
     isValidIdentifier("_a") shouldBe false
   }
 
+  it should "create the correct type of Identifiers" in {
+    import IdentifierType.PreRelease.uncheckedFrom
+
+    uncheckedFrom(Vector("foo", "bar")) shouldEqual new Identifiers.PreRelease(Vector("foo", "bar"))
+  }
+
+  it should "have the correct name" in {
+    IdentifierType.PreRelease.name shouldBe "pre-release"
+  }
+
   behavior of "IdentifierType.Build"
 
   it should "be implicitly available" in {
@@ -40,5 +50,15 @@ class IdentifierTypeTest extends BaseSpec {
 
     isValidIdentifier("") shouldBe false
     isValidIdentifier("_a") shouldBe false
+  }
+
+  it should "create the correct type of Identifiers" in {
+    import IdentifierType.Build.uncheckedFrom
+
+    uncheckedFrom(Vector("foo", "bar")) shouldEqual new Identifiers.Build(Vector("foo", "bar"))
+  }
+
+  it should "have the correct name" in {
+    IdentifierType.Build.name shouldBe "build"
   }
 }

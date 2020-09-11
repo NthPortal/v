@@ -42,10 +42,14 @@ lazy val core = project
     name := "v-core",
     mimaPreviousArtifacts := Set().map(organization.value %% name.value % _),
   )
+lazy val coreTest = core % "test->test"
 
 lazy val semver = project
   .in(file("semver"))
-  .dependsOn(core)
+  .dependsOn(
+    core,
+    coreTest,
+  )
   .settings(sharedSettings)
   .settings(
     name := "v-semver",

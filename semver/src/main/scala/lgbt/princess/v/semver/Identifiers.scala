@@ -1,13 +1,14 @@
 package lgbt.princess.v
 package semver
 
+import scala.collection.SeqFactory
+import scala.collection.SeqFactory.UnapplySeqWrapper
 import scala.collection.immutable.ArraySeq
-import scala.language.implicitConversions
 
 sealed abstract class Identifiers private[semver] (val values: IndexedSeq[String]) {
-  type Self <: Identifiers
+  protected type Self <: Identifiers
 
-  def identifierType: IdentifierType[Self]
+  protected def identifierType: IdentifierType[Self]
 
   override def hashCode(): Int = identifierType.hashCode() * 43 + values.hashCode()
 
@@ -16,9 +17,9 @@ sealed abstract class Identifiers private[semver] (val values: IndexedSeq[String
 
 object Identifiers {
   final class PreRelease private[semver] (_values: IndexedSeq[String]) extends Identifiers(_values) {
-    type Self = PreRelease
+    protected type Self = PreRelease
 
-    def identifierType: IdentifierType[PreRelease] = IdentifierType.PreRelease
+    protected def identifierType: IdentifierType[PreRelease] = IdentifierType.PreRelease
 
     override def equals(obj: Any): Boolean =
       obj match {
@@ -28,9 +29,9 @@ object Identifiers {
   }
 
   final class Build private[semver] (_values: IndexedSeq[String]) extends Identifiers(_values) {
-    type Self = Build
+    protected type Self = Build
 
-    def identifierType: IdentifierType[Build] = IdentifierType.Build
+    protected def identifierType: IdentifierType[Build] = IdentifierType.Build
 
     override def equals(obj: Any): Boolean =
       obj match {
@@ -40,22 +41,8 @@ object Identifiers {
   }
 
   @throws[IllegalArgumentException]
-  private def invalidIdentifiers(identifiers: String, tpe: IdentifierType[_]): Nothing =
+  @inline private def invalidIdentifiers(identifiers: String, tpe: IdentifierType[_]): Nothing =
     throw new IllegalArgumentException(s"invalid series of ${tpe.name} identifiers: '$identifiers'")
-
-  def from[I <: Identifiers](values: Seq[String])(implicit tpe: IdentifierType[I]): Option[I] =
-    if (values.forall(tpe.isValidIdentifier)) Some(tpe.uncheckedFrom(values))
-    else None
-
-  @throws[IllegalArgumentException]
-  def unsafeFrom[I <: Identifiers](values: Seq[String])(implicit tpe: IdentifierType[I]): I = {
-    if (values.forall(tpe.isValidIdentifier)) tpe.uncheckedFrom(values)
-    else invalidIdentifiers(values.toString, tpe)
-  }
-
-  @throws[IllegalArgumentException]
-  @inline def apply[I <: Identifiers](values: String*)(implicit tpe: IdentifierType[I]): I =
-    unsafeFrom(values)
 
   @inline private[this] def splitOnDots(identifiers: String): Array[String] =
     identifiers.split("""\.""", -1)
@@ -63,19 +50,35 @@ object Identifiers {
   @inline private[this] def buildIdentifiers[I <: Identifiers](arr: Array[String])(implicit tpe: IdentifierType[I]): I =
     tpe.uncheckedFrom(ArraySeq.unsafeWrapArray(arr))
 
-  def parse[I <: Identifiers](identifiers: String)(implicit tpe: IdentifierType[I]): Option[I] = {
-    val arr = splitOnDots(identifiers)
-    if (arr forall tpe.isValidIdentifier) Some(buildIdentifiers(arr)) else None
+  sealed abstract class Factory[I <: Identifiers](implicit tpe: IdentifierType[I]) {
+    @inline final def from(values: Seq[String]): Option[I] =
+      if (values.nonEmpty && values.forall(tpe.isValidIdentifier)) Some(tpe.uncheckedFrom(values))
+      else None
+
+    @throws[IllegalArgumentException]
+    final def unsafeFrom(values: Seq[String]): I =
+      if (values.nonEmpty && values.forall(tpe.isValidIdentifier)) tpe.uncheckedFrom(values)
+      else invalidIdentifiers(values.toString, tpe)
+
+    @throws[IllegalArgumentException]
+    @inline final def apply(values: String*): I = unsafeFrom(values)
+
+    final def parse(identifiers: String): Option[I] = {
+      val arr = splitOnDots(identifiers)
+      if (arr forall tpe.isValidIdentifier) Some(buildIdentifiers(arr)) else None
+    }
+
+    @throws[IllegalArgumentException]
+    final def unsafeParse(identifiers: String): I = {
+      val arr = splitOnDots(identifiers)
+      if (arr.forall(tpe.isValidIdentifier)) buildIdentifiers(arr) else invalidIdentifiers(identifiers, tpe)
+    }
+
+    final def unapplySeq(identifiers: I): SeqFactory.UnapplySeqWrapper[String] =
+      new UnapplySeqWrapper(identifiers.values)
   }
 
-  @throws[IllegalArgumentException]
-  def unsafeParse[I <: Identifiers](identifiers: String)(implicit tpe: IdentifierType[I]): I = {
-    val arr = splitOnDots(identifiers)
-    if (arr.forall(tpe.isValidIdentifier)) buildIdentifiers(arr) else invalidIdentifiers(identifiers, tpe)
-  }
+  object PreRelease extends Factory[PreRelease]
 
-  object StringsAsIdentifiers {
-    implicit def unsafe[I <: Identifiers: IdentifierType](s: String): I =
-      Identifiers.unsafeParse(s)
-  }
+  object Build extends Factory[Build]
 }

@@ -1,6 +1,6 @@
 package lgbt.princess.v.semver
 
-sealed trait IdentifierType[I <: Identifiers] {
+sealed trait IdentifierType[+I <: Identifiers] {
   private[semver] def isValidIdentifier(identifier: String): Boolean
 
   private[semver] def uncheckedFrom(values: Seq[String]): I

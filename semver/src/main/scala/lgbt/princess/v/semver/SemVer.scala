@@ -7,7 +7,7 @@ import lgbt.princess.v.semver.Identifiers._
 
 import scala.collection.mutable.{StringBuilder => SStringBuilder}
 
-final case class SemVer(core: V, preRelease: Option[PreRelease], build: Option[Build]) {
+final case class SemVer(core: Core, preRelease: Option[PreRelease], build: Option[Build]) {
   import SemVer._
 
   override def toString: String = {
@@ -27,8 +27,14 @@ object SemVer {
     }
   }
 
-  def apply(version: V, preRelease: PreRelease, build: Build): SemVer =
-    apply(version, Some(preRelease), Some(build))
+  def apply(core: Core): SemVer = apply(core, None, None)
+
+  def apply(core: Core, preRelease: PreRelease): SemVer = apply(core, Some(preRelease), None)
+
+  def apply(core: Core, build: Build): SemVer = apply(core, None, Some(build))
+
+  def apply(core: Core, preRelease: PreRelease, build: Build): SemVer =
+    apply(core, Some(preRelease), Some(build))
 
   private[this] def splitVersion(version: String): (String, Option[String], Option[String]) = {
     val plusSplit = version.split("""\+""", 2)
@@ -42,18 +48,18 @@ object SemVer {
   }
 
   def parse(version: String): Option[SemVer] = {
-    def parseIdentifiers[I <: Identifiers: IdentifierType](identifiers: Option[String]): Option[Option[I]] =
+    def parseIdentifiers[I <: Identifiers](factory: Factory[I])(identifiers: Option[String]): Option[Option[I]] =
       identifiers match {
         case None      => Some(None)
-        case Some(str) => Identifiers.parse(str).map(Some(_))
+        case Some(str) => factory.parse(str).map(Some(_))
       }
 
     val (coreStr, preReleaseStr, buildStr) = splitVersion(version)
 
     for {
-      core       <- V parse coreStr
-      preRelease <- parseIdentifiers[PreRelease](preReleaseStr)
-      build      <- parseIdentifiers[Build](buildStr)
+      core       <- Core parse coreStr
+      preRelease <- parseIdentifiers(PreRelease)(preReleaseStr)
+      build      <- parseIdentifiers(Build)(buildStr)
     } yield apply(core, preRelease, build)
   }
 
@@ -63,15 +69,15 @@ object SemVer {
 
     try {
       apply(
-        V unsafeParse core,
-        preRelease map Identifiers.unsafeParse[PreRelease],
-        build map Identifiers.unsafeParse[Build]
+        Core unsafeParse core,
+        preRelease map PreRelease.unsafeParse,
+        build map Build.unsafeParse
       )
     } catch {
       case e: IllegalArgumentException => throw new VersionFormatException(version, "SemVer version", e)
     }
   }
 
-  def unapply(version: String): Option[(V, Option[PreRelease], Option[Build])] =
+  def unapply(version: String): Option[(Core, Option[PreRelease], Option[Build])] =
     parse(version) flatMap unapply
 }
