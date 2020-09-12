@@ -40,7 +40,7 @@ lazy val core = project
   .settings(sharedSettings)
   .settings(
     name := "v-core",
-    mimaPreviousArtifacts := Set().map(organization.value %% name.value % _),
+    mimaPreviousArtifacts := Set(organization.value %% "v" % "0.1.0"),
   )
 lazy val coreTest = core % "test->test"
 
@@ -64,5 +64,5 @@ lazy val root = project
   )
   .settings(
     name := "v",
-    mimaPreviousArtifacts := Set("0.1.0").map(organization.value %% name.value % _),
+    mimaPreviousArtifacts := Set.empty,
   )

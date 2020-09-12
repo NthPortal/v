@@ -108,6 +108,7 @@ class V2Test extends BaseSpec {
     V2.parse("-1.-2").value shouldBe V2(-1, -2)
 
     V2.parse("") shouldBe empty
+    V2.parse(" ") shouldBe empty
     V2.parse("1") shouldBe empty
     V2.parse("1.2.") shouldBe empty
     V2.parse(".1.2") shouldBe empty
@@ -127,12 +128,5 @@ class V2Test extends BaseSpec {
     a[VersionFormatException] should be thrownBy { V2 unsafeParse ".1.2" }
     a[VersionFormatException] should be thrownBy { V2 unsafeParse "1.2.3" }
     a[VersionFormatException] should be thrownBy { V2 unsafeParse "not a version" }
-  }
-
-  it should "extract from strings" in {
-    "1.2" shouldMatch { case V2(1, 2) => }
-
-    "1" shouldNotMatch { case V2(_, _) => }
-    "1.2.3" shouldNotMatch { case V2(_, _) => }
   }
 }

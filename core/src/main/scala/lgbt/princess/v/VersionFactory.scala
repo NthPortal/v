@@ -186,15 +186,6 @@ trait VersionFactory[+V <: Version] {
       if (isValidSeq(seq)) uncheckedFromSeq(seq) else fail()
     } else fail()
   }
-
-  /**
-   * Extracts a version from a string.
-   *
-   * @param version the string representation of a version
-   * @return an [[scala.Option Option]] containing a version,
-   *         if it is valid for this factory
-   */
-  final def unapply(version: String): Option[V] = parse(version)
 }
 
 object VersionFactory {

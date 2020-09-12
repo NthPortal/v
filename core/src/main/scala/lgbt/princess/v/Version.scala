@@ -1,6 +1,6 @@
 package lgbt.princess.v
 
-/** A version. */
+/** A version consisting of some number of numeric identifiers. */
 trait Version extends Product {
   type Self <: Version
 

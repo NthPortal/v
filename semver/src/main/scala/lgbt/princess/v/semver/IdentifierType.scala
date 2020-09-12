@@ -1,5 +1,6 @@
 package lgbt.princess.v.semver
 
+/** A type of identifier used by a particular [[Identifiers]] subtype. */
 sealed trait IdentifierType[+I <: Identifiers] {
   private[semver] def isValidIdentifier(identifier: String): Boolean
 
@@ -12,10 +13,13 @@ object IdentifierType {
   private[semver] final val baseIdentifierRegex = "[0-9A-Za-z-]+".r
   private[semver] final val leadingZerosRegex   = "0[0-9]+".r
 
+  /** The type of a pre-release identifier. */
   type PreRelease = IdentifierType[Identifiers.PreRelease]
-  type Build      = IdentifierType[Identifiers.Build]
 
-  case object PreRelease extends IdentifierType[Identifiers.PreRelease] {
+  /** The type of a build identifier. */
+  type Build = IdentifierType[Identifiers.Build]
+
+  private[semver] case object PreRelease extends IdentifierType[Identifiers.PreRelease] {
     private[semver] def isValidIdentifier(identifier: String) =
       baseIdentifierRegex.matches(identifier) && !leadingZerosRegex.matches(identifier)
 
@@ -24,7 +28,7 @@ object IdentifierType {
     private[semver] def name = "pre-release"
   }
 
-  case object Build extends IdentifierType[Identifiers.Build] {
+  private[semver] case object Build extends IdentifierType[Identifiers.Build] {
     private[semver] def isValidIdentifier(identifier: String) =
       baseIdentifierRegex matches identifier
 

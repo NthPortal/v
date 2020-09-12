@@ -3,11 +3,11 @@ package lgbt.princess.v
 import scala.collection.immutable.ArraySeq
 
 /**
- * A version of size 3.
+ * A version with 4 identifiers.
  *
  * @param major the major version number
  * @param minor the minor version number
- * @param patch the patch version number
+ * @param patch the patch number
  * @param build the build number
  */
 final case class V4(major: Int, minor: Int, patch: Int, build: Int) extends Version with Ordered[V4] {

@@ -120,6 +120,7 @@ class V4Test extends BaseSpec {
     V4.parse("-1.-2.-3.-4").value shouldBe V4(-1, -2, -3, -4)
 
     V4.parse("") shouldBe empty
+    V4.parse(" ") shouldBe empty
     V4.parse("1.2.3") shouldBe empty
     V4.parse("1.2.3.4.") shouldBe empty
     V4.parse(".1.2.3.4") shouldBe empty
@@ -139,12 +140,5 @@ class V4Test extends BaseSpec {
     a[VersionFormatException] should be thrownBy { V4 unsafeParse ".1.2.3.4" }
     a[VersionFormatException] should be thrownBy { V4 unsafeParse "1.2.3.4.5" }
     a[VersionFormatException] should be thrownBy { V4 unsafeParse "not a version" }
-  }
-
-  it should "extract from strings" in {
-    "1.2.3.4" shouldMatch { case V4(1, 2, 3, 4) => }
-
-    "1.2.3" shouldNotMatch { case V4(_, _, _, _) => }
-    "1.2.3.4.5" shouldNotMatch { case V4(_, _, _, _) => }
   }
 }

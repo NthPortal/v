@@ -137,6 +137,7 @@ class VariableTest extends BaseSpec {
     Variable.parse("-3.2.-4").value shouldBe Variable(-3, 2, -4)
 
     Variable.parse("") shouldBe empty
+    Variable.parse(" ") shouldBe empty
     Variable.parse("1.2.") shouldBe empty
     Variable.parse(".1.2") shouldBe empty
     Variable.parse("not a version") shouldBe empty
@@ -152,5 +153,14 @@ class VariableTest extends BaseSpec {
     a[VersionFormatException] should be thrownBy { Variable unsafeParse "1.2." }
     a[VersionFormatException] should be thrownBy { Variable unsafeParse ".1.2" }
     a[VersionFormatException] should be thrownBy { Variable unsafeParse "not a version" }
+  }
+
+  it should "extract from instances of itself" in {
+    Variable(1, 2) shouldMatch { case Variable(1, 2) => }
+    Variable(1, 2, 3) shouldMatch { case Variable(1, 2, 3) => }
+    Variable(1, 2, 3, 4) shouldMatch { case Variable(1, 2, 3, 4) => }
+
+    Variable(1, 2) shouldNotMatch { case Variable(_, _, _) => }
+    Variable(1, 2, 3, 4) shouldNotMatch { case Variable(_, _, _) => }
   }
 }

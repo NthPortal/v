@@ -113,6 +113,7 @@ class V3Test extends BaseSpec {
     V3.parse("-1.-2.-3").value shouldBe V3(-1, -2, -3)
 
     V3.parse("") shouldBe empty
+    V3.parse(" ") shouldBe empty
     V3.parse("1.2") shouldBe empty
     V3.parse("1.2.3.") shouldBe empty
     V3.parse(".1.2.3") shouldBe empty
@@ -132,12 +133,5 @@ class V3Test extends BaseSpec {
     a[VersionFormatException] should be thrownBy { V3 unsafeParse ".1.2.3" }
     a[VersionFormatException] should be thrownBy { V3 unsafeParse "1.2.3.4" }
     a[VersionFormatException] should be thrownBy { V3 unsafeParse "not a version" }
-  }
-
-  it should "extract from strings" in {
-    "1.2.3" shouldMatch { case V3(1, 2, 3) => }
-
-    "1.2" shouldNotMatch { case V3(_, _, _) => }
-    "1.2.3.4" shouldNotMatch { case V3(_, _, _) => }
   }
 }

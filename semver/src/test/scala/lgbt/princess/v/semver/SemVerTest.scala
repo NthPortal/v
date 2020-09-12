@@ -53,19 +53,10 @@ class SemVerTest extends BaseSpec {
     "1.2.3-alpha+12" shouldMatch { case SemVer(Core(1, 2, 3), Some(_), Some(B("12"))) => }
 
     "-1.2.3" shouldNotMatch { case SemVer(_, _, _) => }
-    "1.-2.3"  shouldNotMatch { case SemVer(_, _, _) => }
-    "1.2.3-01"  shouldNotMatch { case SemVer(_, _, _) => }
-    "1.2.3+foo..bar"  shouldNotMatch { case SemVer(_, _, _) => }
-    "1.2.3-alpha+foo_bar"  shouldNotMatch { case SemVer(_, _, _) => }
-  }
-
-  it should "construct using symbolic and extension methods" in {
-    Core(1, 2, 3).toSemVer shouldEqual SemVer(Core(1, 2, 3))
-    (Core(1, 2, 3) - PR("alpha"): SemVer) shouldEqual SemVer(Core(1, 2, 3), PR("alpha"))
-    (Core(1, 2, 3) - PR("alpha")).toSemVer shouldEqual SemVer(Core(1, 2, 3), PR("alpha"))
-    (Core(1, 2, 3) - PR("alpha")).withoutMetadata shouldEqual SemVer(Core(1, 2, 3), PR("alpha"))
-    Core(1, 2, 3) + B("12") shouldEqual SemVer(Core(1, 2, 3), B("12"))
-    Core(1, 2, 3) - PR("alpha") + B("12") shouldEqual SemVer(Core(1, 2, 3), PR("alpha"), B("12"))
+    "1.-2.3" shouldNotMatch { case SemVer(_, _, _) => }
+    "1.2.3-01" shouldNotMatch { case SemVer(_, _, _) => }
+    "1.2.3+foo..bar" shouldNotMatch { case SemVer(_, _, _) => }
+    "1.2.3-alpha+foo_bar" shouldNotMatch { case SemVer(_, _, _) => }
   }
 
   it should "extract using symbols correctly" in {
