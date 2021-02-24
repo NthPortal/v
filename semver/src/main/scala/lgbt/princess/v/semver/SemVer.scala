@@ -17,9 +17,6 @@ import scala.collection.mutable.{StringBuilder => SStringBuilder}
 final case class SemVer(core: Core, preRelease: Option[PreRelease], build: Option[Build]) extends Ordered[SemVer] {
   import SemVer._
 
-  /** @return whether or not this version is a pre-release */
-  @inline def isPreRelease: Boolean = preRelease.isDefined
-
   def compare(that: SemVer): Int = ordering.compare(this, that)
 
   override def toString: String = {

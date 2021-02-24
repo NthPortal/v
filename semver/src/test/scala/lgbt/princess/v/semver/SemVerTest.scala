@@ -24,13 +24,6 @@ class SemVerTest extends BaseSpec {
     SemVer(Core(1, 2, 3), PR("alpha"), B("12")) shouldEqual SemVer(Core(1, 2, 3), Some(PR("alpha")), Some(B("12")))
   }
 
-  it should "return whether or not it is a pre-release" in {
-    SemVer(Core(1, 2, 3)).isPreRelease shouldBe false
-    SemVer(Core(1, 2, 3), PR("alpha")).isPreRelease shouldBe true
-    SemVer(Core(1, 2, 3), B("12")).isPreRelease shouldBe false
-    SemVer(Core(1, 2, 3), PR("alpha"), B("12")).isPreRelease shouldBe true
-  }
-
   it should "be ordered correctly" in {
     SemVer(Core(1, 2, 3)) should be < SemVer(Core(1, 2, 4), PR("alpha"))
     SemVer(Core(1, 2, 3)) should be < SemVer(Core(1, 3, 0), PR("alpha"))
