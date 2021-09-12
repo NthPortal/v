@@ -40,7 +40,7 @@ object Nightly {
     }
   }
 
-  implicit object NightlyIsMappable extends Mappable.ForwardingUnsafeMap[Nightly, Identifiers.PreRelease] {
+  implicit object NightlyMapper extends Mapper.ForwardingUnsafeMap[Nightly, Identifiers.PreRelease] {
     protected[this] def resultType: String = "Scala nightly"
 
     def map(identifiers: Identifiers.PreRelease): Option[Nightly] =
@@ -54,7 +54,7 @@ object Nightly {
       }
   }
 
-  implicit object NightlyIsUnmappable extends Unmappable[Nightly, Identifiers.PreRelease] {
+  implicit object NightlyUnmapper extends Unmapper[Nightly, Identifiers.PreRelease] {
     def unmap(nightly: Nightly): Identifiers.PreRelease = Identifiers.PreRelease(nightly.tag)
   }
 }

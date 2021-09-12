@@ -3,7 +3,7 @@ package mapped
 
 import lgbt.princess.v.semver.Identifiers.{Build, PreRelease}
 
-abstract class Mapping[P, B](implicit pM: Mappable[P, PreRelease], bM: Mappable[B, Build]) {
+abstract class Mapping[P, B](implicit pM: Mapper[P, PreRelease], bM: Mapper[B, Build]) {
   final type Mapped = MappedSemVer[P, B]
 
   final def map(sv: SemVer): Option[Mapped] = MappedSemVer.map[P, B](sv)
