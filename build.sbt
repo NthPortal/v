@@ -137,7 +137,7 @@ lazy val sharedSettings = Seq(
 )
 
 lazy val defaultMimaSettings = Seq(
-  mimaPreviousArtifacts := Set().map(organization.value %% name.value % _),
+  mimaPreviousArtifacts := Set().map(organization.value %% name.value % _)
 )
 
 lazy val core = project
@@ -145,7 +145,7 @@ lazy val core = project
   .settings(sharedSettings)
   .settings(defaultMimaSettings)
   .settings(
-    name := "v-core",
+    name := "v-core"
   )
 lazy val coreTest = core % "test->test"
 
@@ -158,25 +158,31 @@ lazy val semver = project
   .settings(sharedSettings)
   .settings(defaultMimaSettings)
   .settings(
-    name := "v-semver",
+    name := "v-semver"
   )
 
 lazy val semverMapped = project
   .in(file("semver-mapped"))
-  .dependsOn(semver)
+  .dependsOn(
+    semver,
+    coreTest,
+  )
   .settings(sharedSettings)
   .settings(defaultMimaSettings)
   .settings(
-    name := "v-semver-mapped",
+    name := "v-semver-mapped"
   )
 
 lazy val semverMappedExt = project
   .in(file("semver-mapped-extensions"))
-  .dependsOn(semverMapped)
+  .dependsOn(
+    semverMapped,
+    coreTest,
+  )
   .settings(sharedSettings)
   .settings(defaultMimaSettings)
   .settings(
-    name := "v-semver-mapped-extensions",
+    name := "v-semver-mapped-extensions"
   )
 
 lazy val root = project

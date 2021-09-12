@@ -29,6 +29,7 @@ object Mappable {
    * [[Mappable.unsafeMap() `unsafeMap`]] to [[Mappable.map() `map`]].
    */
   trait ForwardingUnsafeMap[A, -I <: Identifiers] extends Mappable[A, I] {
+
     /** A description of the result type of the mapping operation. */
     protected[this] def resultType: String
 
