@@ -6,9 +6,6 @@ import lgbt.princess.v.semver.Identifiers._
 final case class MappedSemVer[P, B](core: Core, preRelease: Option[P], build: Option[B]) {
   import MappedSemVer._
 
-  /** @return whether or not this version is a pre-release */
-  @inline def isPreRelease: Boolean = preRelease.isDefined
-
   def unmap(implicit uP: Unmappable[P, PreRelease], uB: Unmappable[B, Build]): SemVer =
     SemVer(core, preRelease.map(uP.unmap), build.map(uB.unmap))
 
@@ -19,8 +16,19 @@ final case class MappedSemVer[P, B](core: Core, preRelease: Option[P], build: Op
 object MappedSemVer {
   private[this] final val someNone = Some(None)
 
-  implicit def ordering[P, B](implicit uP: Unmappable[P, PreRelease], uB: Unmappable[B, Build]): Ordering[MappedSemVer[P, B]] =
+  implicit def ordering[P, B](implicit
+      uP: Unmappable[P, PreRelease],
+      uB: Unmappable[B, Build],
+  ): Ordering[MappedSemVer[P, B]] =
     (x, y) => x.unmap compare y.unmap
+
+  object ObjectEqualityOrdering {
+    implicit def ordering[P, B](implicit
+        uP: Unmappable[P, PreRelease],
+        uB: Unmappable[B, Build],
+    ): Ordering[MappedSemVer[P, B]] =
+      (x, y) => SemVer.ObjectEqualityOrdering.ordering.compare(x.unmap, y.unmap)
+  }
 
   @inline private def prefixedOption(prefix: Char, opt: Option[Any]): Unit =
     opt.fold("")(value => s"$prefix$value")
