@@ -1,6 +1,6 @@
 package lgbt.princess.v.semver
 package mapped
-package scala_builds
+package ext.scala_builds
 
 object ScalaVersion extends Mapping[Nightly, Nothing] {
   def apply(core: Core): ScalaVersion = MappedSemVer(core)

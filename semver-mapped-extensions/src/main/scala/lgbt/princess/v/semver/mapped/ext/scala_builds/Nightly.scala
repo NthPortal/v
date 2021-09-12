@@ -1,11 +1,11 @@
 package lgbt.princess.v.semver
 package mapped
-package scala_builds
+package ext.scala_builds
 
 final case class Nightly(kind: Nightly.Kind, commitHashPrefix: String) {
   import Nightly._
 
-  require(commitHashPrefixRegex matches commitHashPrefix, "commit hash prefix must be 7 hex digits")
+  require(commitHashPrefixRegex matches commitHashPrefix, "commit hash prefix must be exactly 7 hex digits")
 
   def tag: String = s"${kind.signifier}-$commitHashPrefix"
 
